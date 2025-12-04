@@ -1,6 +1,13 @@
 # 🔐 加密演算法與區塊鏈簽名範例
 
+[![GitHub Pages](https://img.shields.io/badge/demo-online-brightgreen?style=flat-square&logo=github)](https://wmh.github.io/crypto-web-demo/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/wmh/crypto-web-demo?style=flat-square)](https://github.com/wmh/crypto-web-demo/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/wmh/crypto-web-demo?style=flat-square)](https://github.com/wmh/crypto-web-demo/issues)
+
 一個純前端的加密演算法和區塊鏈簽名演示專案，涵蓋主流加密技術和區塊鏈簽名機制。
+
+**🌐 線上展示**: [https://wmh.github.io/crypto-web-demo/](https://wmh.github.io/crypto-web-demo/)
 
 ## ✨ 特色功能
 
