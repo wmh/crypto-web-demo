@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tron 範例</title>
+    <link rel="stylesheet" href="../styles/common.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Tron 簽名與交易</h1>
+        
+        <nav class="nav-bar">
+            <a href="../index.html">首頁</a>
+            <a href="hash.html">雜湊演算法</a>
+            <a href="symmetric.html">對稱加密</a>
+            <a href="asymmetric.html">非對稱加密</a>
+            <a href="ethereum.html">Ethereum</a>
+            <a href="bitcoin.html">Bitcoin</a>
+            <a href="solana.html">Solana</a>
+            <a href="cosmos.html">Cosmos</a>
+            <a href="tron.html" class="active">Tron</a>
+            <a href="polkadot.html">Polkadot</a>
+        </nav>
+
+        <div class="info-box">
+            <h4>⚡ Tron 簽名與交易</h4>
+            <p>Tron 使用 ECDSA (secp256k1) 進行簽名，與 Ethereum 類似但地址格式不同。Tron 地址以 T 開頭，使用 Base58Check 編碼。支援 TRC-10 和 TRC-20 代幣標準。</p>
+        </div>
+
+        <div class="demo-section">
+            <h3>1. 生成 Tron 錢包</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'tron-wallet-code')">複製</button>
+                </div>
+                <pre><code id="tron-wallet-code" class="language-javascript">// Tron 使用 secp256k1 (與 Ethereum 相同)
+const EC = require('elliptic').ec;
+const ec = new EC('secp256k1');
+
+// 生成密鑰對
+const keyPair = ec.genKeyPair();
+const privateKey = keyPair.getPrivate('hex');
+const publicKey = keyPair.getPublic('hex');
+
+// Tron 地址生成
+// 1. Keccak-256 公鑰後取後 20 bytes
+const address20 = keccak256(publicKey).slice(-40);
+// 2. 添加前綴 0x41 (Tron 主網)
+const addressWithPrefix = '41' + address20;
+// 3. Base58Check 編碼
+const tronAddress = base58CheckEncode(addressWithPrefix);
+// 結果: T... (主網地址以 T 開頭)</code></pre>
+            </div>
+
+            <button onclick="generateTronWallet()">生成 Tron 錢包</button>
+            <div id="tronWalletOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>2. 簽署訊息</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'tron-sign-code')">複製</button>
+                </div>
+                <pre><code id="tron-sign-code" class="language-javascript">// Tron 訊息簽名
+const message = "Tron message";
+const prefix = "\x19TRON Signed Message:\n32";
+const fullMessage = prefix + message;
+
+// 雜湊訊息
+const msgHash = CryptoJS.SHA256(fullMessage).toString();
+
+// 簽署
+const signature = keyPair.sign(msgHash);
+const r = signature.r.toString('hex');
+const s = signature.s.toString('hex');
+const v = signature.recoveryParam + 27; // Recovery ID
+
+// Tron 簽名格式: r + s + v
+const tronSignature = r + s + v.toString(16);
+
+// 驗證
+const valid = keyPair.verify(msgHash, signature);
+console.log("簽名有效:", valid);</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>訊息：</label>
+                <input type="text" id="tronMessage" value="Tron Power!" placeholder="輸入要簽署的訊息">
+            </div>
+            <button onclick="signTronMessage()">✍️ 簽署訊息</button>
+            <button onclick="verifyTronMessage()">✅ 驗證簽名</button>
+            <div id="tronMessageOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>3. 建立並簽署轉帳交易</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'tron-tx-code')">複製</button>
+                </div>
+                <pre><code id="tron-tx-code" class="language-javascript">// Tron 交易結構
+const transaction = {
+    txID: "", // 交易 ID (計算後填入)
+    raw_data: {
+        contract: [{
+            type: "TransferContract",
+            parameter: {
+                value: {
+                    amount: 1000000, // 1 TRX = 1,000,000 sun
+                    owner_address: fromAddressHex,
+                    to_address: toAddressHex
+                }
+            }
+        }],
+        ref_block_bytes: "...", // 參考區塊
+        ref_block_hash: "...",
+        expiration: timestamp + 60000, // 過期時間
+        timestamp: timestamp
+    }
+};
+
+// 計算交易 ID (SHA-256 raw_data)
+const txID = SHA256(JSON.stringify(transaction.raw_data));
+transaction.txID = txID;
+
+// 簽署交易
+const signature = signTransaction(privateKey, txID);
+transaction.signature = [signature];
+
+// 廣播交易
+// POST to https://api.trongrid.io/wallet/broadcasttransaction</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>收款地址：</label>
+                <input type="text" id="tronToAddress" value="TLPnVWjh4PGcDXXw8rST1rWFaE5uBb8pP" placeholder="T...">
+            </div>
+            <div class="input-group">
+                <label>金額 (TRX)：</label>
+                <input type="text" id="tronAmount" value="1" placeholder="1">
+            </div>
+            <button onclick="createTronTransaction()">📝 建立並簽署交易</button>
+            <div id="tronTxOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>4. TRC-20 代幣交易</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'trc20-code')">複製</button>
+                </div>
+                <pre><code id="trc20-code" class="language-javascript">// TRC-20 代幣轉帳 (類似 ERC-20)
+const transaction = {
+    raw_data: {
+        contract: [{
+            type: "TriggerSmartContract",
+            parameter: {
+                value: {
+                    owner_address: fromAddressHex,
+                    contract_address: tokenContractAddress,
+                    data: encodeTransferData(toAddress, amount)
+                }
+            }
+        }]
+    }
+};
+
+// 編碼 transfer(address,uint256) 函數
+function encodeTransferData(toAddress, amount) {
+    // 函數選擇器: transfer(address,uint256)
+    const methodId = 'a9059cbb';
+    // 參數: 地址 (32 bytes) + 金額 (32 bytes)
+    const paddedAddress = toAddress.padStart(64, '0');
+    const paddedAmount = amount.toString(16).padStart(64, '0');
+    return methodId + paddedAddress + paddedAmount;
+}
+
+// USDT-TRC20: TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>代幣合約地址：</label>
+                <input type="text" id="trc20Contract" value="TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t" placeholder="USDT-TRC20">
+            </div>
+            <div class="input-group">
+                <label>收款地址：</label>
+                <input type="text" id="trc20ToAddress" value="TLPnVWjh4PGcDXXw8rST1rWFaE5uBb8pP" placeholder="T...">
+            </div>
+            <div class="input-group">
+                <label>金額：</label>
+                <input type="text" id="trc20Amount" value="10" placeholder="10">
+            </div>
+            <button onclick="createTRC20Transaction()">📝 建立 TRC-20 交易</button>
+            <div id="trc20Output" class="output"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/elliptic/6.5.4/elliptic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="../scripts/tron.js"></script>
+    <script>
+        function copyCode(btn, codeId) {
+            const code = document.getElementById(codeId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = '已複製！';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '複製';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

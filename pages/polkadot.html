@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polkadot 範例</title>
+    <link rel="stylesheet" href="../styles/common.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔴 Polkadot 簽名與交易</h1>
+        
+        <nav class="nav-bar">
+            <a href="../index.html">首頁</a>
+            <a href="hash.html">雜湊演算法</a>
+            <a href="symmetric.html">對稱加密</a>
+            <a href="asymmetric.html">非對稱加密</a>
+            <a href="ethereum.html">Ethereum</a>
+            <a href="bitcoin.html">Bitcoin</a>
+            <a href="solana.html">Solana</a>
+            <a href="cosmos.html">Cosmos</a>
+            <a href="tron.html">Tron</a>
+            <a href="polkadot.html" class="active">Polkadot</a>
+        </nav>
+
+        <div class="info-box">
+            <h4>🔴 Polkadot 簽名與交易</h4>
+            <p>Polkadot 使用 SR25519 簽名演算法（Schnorr 簽名變體），也支援 Ed25519 和 ECDSA。地址使用 SS58 編碼格式，不同網路有不同的前綴（Polkadot: 0, Kusama: 2）。</p>
+        </div>
+
+        <div class="demo-section">
+            <h3>1. 生成 Polkadot 錢包 (SR25519)</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'dot-wallet-code')">複製</button>
+                </div>
+                <pre><code id="dot-wallet-code" class="language-javascript">// 使用 @polkadot/util-crypto
+const { 
+    mnemonicGenerate, 
+    mnemonicToMiniSecret,
+    sr25519PairFromSeed,
+    encodeAddress 
+} = require('@polkadot/util-crypto');
+
+// 1. 生成助記詞 (BIP-39)
+const mnemonic = mnemonicGenerate(12);
+
+// 2. 從助記詞生成種子
+const seed = mnemonicToMiniSecret(mnemonic);
+
+// 3. 生成 SR25519 密鑰對
+const keyPair = sr25519PairFromSeed(seed);
+
+// 4. 生成地址 (SS58 編碼)
+const address = encodeAddress(keyPair.publicKey, 0); // 0 = Polkadot
+
+console.log("助記詞:", mnemonic);
+console.log("地址:", address); // 以 1 開頭的地址
+console.log("公鑰:", keyPair.publicKey);
+
+// Kusama 地址 (前綴 2)
+const kusamaAddress = encodeAddress(keyPair.publicKey, 2);</code></pre>
+            </div>
+
+            <button onclick="generateDotWallet()">生成 Polkadot 錢包</button>
+            <div id="dotWalletOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>2. 簽署訊息 (SR25519)</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'dot-sign-code')">複製</button>
+                </div>
+                <pre><code id="dot-sign-code" class="language-javascript">// SR25519 簽名
+const { sr25519Sign, sr25519Verify } = require('@polkadot/util-crypto');
+const { stringToU8a } = require('@polkadot/util');
+
+// 準備訊息
+const message = "Polkadot message";
+const messageU8a = stringToU8a(message);
+
+// 簽署
+const signature = sr25519Sign(messageU8a, keyPair);
+console.log("簽名:", signature);
+
+// 驗證
+const isValid = sr25519Verify(messageU8a, signature, keyPair.publicKey);
+console.log("驗證結果:", isValid);
+
+// SR25519 特點:
+// - 基於 Schnorr 簽名
+// - 更安全的隨機數生成
+// - 支援批次驗證
+// - 簽名長度 64 bytes</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>訊息：</label>
+                <input type="text" id="dotMessage" value="Polkadot Ecosystem" placeholder="輸入要簽署的訊息">
+            </div>
+            <button onclick="signDotMessage()">✍️ 簽署訊息</button>
+            <button onclick="verifyDotMessage()">✅ 驗證簽名</button>
+            <div id="dotMessageOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>3. 建立並簽署轉帳交易</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'dot-tx-code')">複製</button>
+                </div>
+                <pre><code id="dot-tx-code" class="language-javascript">// 使用 @polkadot/api
+const { ApiPromise, WsProvider } = require('@polkadot/api');
+
+// 1. 連接節點
+const wsProvider = new WsProvider('wss://rpc.polkadot.io');
+const api = await ApiPromise.create({ provider: wsProvider });
+
+// 2. 建立轉帳交易
+const transfer = api.tx.balances.transfer(
+    recipientAddress,
+    amount // 以 Planck 為單位 (1 DOT = 10^10 Planck)
+);
+
+// 3. 簽署並發送
+const hash = await transfer.signAndSend(keyPair, ({ status }) => {
+    if (status.isInBlock) {
+        console.log('交易已打包:', hash.toString());
+    } else if (status.isFinalized) {
+        console.log('交易已確認:', hash.toString());
+    }
+});
+
+// Extrinsic (外部交易) 結構:
+// - Signature: SR25519 簽名
+// - Era: 交易有效期
+// - Nonce: 帳戶 nonce
+// - Tip: 小費 (加速打包)</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>收款地址：</label>
+                <input type="text" id="dotToAddress" value="1FRMM8PEiWXYax7rpS6X4XZX1aAAxSWx1CrKTyrVYhV24fg" placeholder="1...">
+            </div>
+            <div class="input-group">
+                <label>金額 (DOT)：</label>
+                <input type="text" id="dotAmount" value="1" placeholder="1">
+            </div>
+            <button onclick="createDotTransaction()">📝 建立並簽署交易</button>
+            <div id="dotTxOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>4. 跨鏈轉帳 (XCM)</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'xcm-code')">複製</button>
+                </div>
+                <pre><code id="xcm-code" class="language-javascript">// XCM (Cross-Consensus Message) - Polkadot 跨鏈協議
+const { ApiPromise } = require('@polkadot/api');
+
+// 1. 從中繼鏈轉到平行鏈
+const xcmTransfer = api.tx.xcmPallet.reserveTransferAssets(
+    // 目標鏈
+    { V3: { parents: 0, interior: { X1: { Parachain: 2000 } } } },
+    // 受益人
+    { V3: { parents: 0, interior: { X1: { AccountId32: { 
+        network: null, 
+        id: recipientPublicKey 
+    }}}}},
+    // 資產
+    { V3: [{ 
+        id: { Concrete: { parents: 0, interior: 'Here' } },
+        fun: { Fungible: amount }
+    }]},
+    0 // Fee asset item
+);
+
+// 2. 簽署並發送
+await xcmTransfer.signAndSend(keyPair);
+
+// XCM 支援:
+// - 平行鏈間轉帳
+// - 跨共識訊息
+// - 遠程執行
+// - 資產跨鏈</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>目標平行鏈 ID：</label>
+                <input type="text" id="parachainId" value="2000" placeholder="2000 (Acala)">
+            </div>
+            <div class="input-group">
+                <label>收款地址：</label>
+                <input type="text" id="xcmToAddress" value="1FRMM8PEiWXYax7rpS6X4XZX1aAAxSWx1CrKTyrVYhV24fg" placeholder="1...">
+            </div>
+            <div class="input-group">
+                <label>金額 (DOT)：</label>
+                <input type="text" id="xcmAmount" value="1" placeholder="1">
+            </div>
+            <button onclick="createXCMTransaction()">📝 建立 XCM 交易</button>
+            <div id="xcmOutput" class="output"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="../scripts/polkadot.js"></script>
+    <script>
+        function copyCode(btn, codeId) {
+            const code = document.getElementById(codeId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = '已複製！';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '複製';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

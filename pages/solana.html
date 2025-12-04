@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solana 範例</title>
+    <link rel="stylesheet" href="../styles/common.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>◎ Solana 簽名與交易</h1>
+        
+        <nav class="nav-bar">
+            <a href="../index.html">首頁</a>
+            <a href="hash.html">雜湊演算法</a>
+            <a href="symmetric.html">對稱加密</a>
+            <a href="asymmetric.html">非對稱加密</a>
+            <a href="ethereum.html">Ethereum</a>
+            <a href="bitcoin.html">Bitcoin</a>
+            <a href="solana.html" class="active">Solana</a>
+            <a href="cosmos.html">Cosmos</a>
+                    <a href="tron.html">Tron</a>
+            <a href="polkadot.html">Polkadot</a>
+        </nav>
+
+        <div class="info-box">
+            <h4>◎ Solana 簽名與交易</h4>
+            <p>Solana 使用 Ed25519 簽名演算法，以高效能和低成本著稱。地址就是 Ed25519 公鑰的 Base58 編碼。</p>
+        </div>
+
+        <div class="demo-section">
+            <h3>1. 生成 Solana 錢包</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'sol-wallet-code')">複製</button>
+                </div>
+                <pre><code id="sol-wallet-code" class="language-javascript">// 使用 @solana/web3.js
+const { Keypair } = require('@solana/web3.js');
+
+// 生成新錢包
+const keypair = Keypair.generate();
+console.log("公鑰:", keypair.publicKey.toString());
+console.log("私鑰 (Base58):", bs58.encode(keypair.secretKey));
+
+// 從私鑰恢復
+const restored = Keypair.fromSecretKey(secretKey);
+
+// Solana 使用 Ed25519 簽名演算法
+// 地址就是公鑰的 Base58 編碼</code></pre>
+            </div>
+
+            <button onclick="generateSolWallet()">生成 Solana 錢包</button>
+            <div id="solWalletOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>2. 簽署訊息</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'sol-sign-code')">複製</button>
+                </div>
+                <pre><code id="sol-sign-code" class="language-javascript">// 使用 TweetNaCl 簽署訊息
+const nacl = require('tweetnacl');
+
+const message = "Solana is fast!";
+const messageBytes = new TextEncoder().encode(message);
+
+// 簽署
+const signature = nacl.sign.detached(
+    messageBytes, 
+    keypair.secretKey
+);
+
+// 驗證
+const valid = nacl.sign.detached.verify(
+    messageBytes,
+    signature,
+    keypair.publicKey.toBytes()
+);
+console.log("簽名有效:", valid);</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>訊息：</label>
+                <input type="text" id="solMessage" value="Solana is fast!" placeholder="輸入要簽署的訊息">
+            </div>
+            <button onclick="signSolMessage()">✍️ 簽署訊息</button>
+            <button onclick="verifySolMessage()">✅ 驗證簽名</button>
+            <div id="solMessageOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>3. 建立並簽署轉帳交易</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'sol-tx-code')">複製</button>
+                </div>
+                <pre><code id="sol-tx-code" class="language-javascript">// Solana 轉帳交易
+const { 
+    Transaction, 
+    SystemProgram, 
+    LAMPORTS_PER_SOL 
+} = require('@solana/web3.js');
+
+// 建立轉帳指令
+const instruction = SystemProgram.transfer({
+    fromPubkey: keypair.publicKey,
+    toPubkey: new PublicKey('11111...'),
+    lamports: 0.01 * LAMPORTS_PER_SOL
+});
+
+// 建立交易
+const transaction = new Transaction().add(instruction);
+transaction.recentBlockhash = await getRecentBlockhash();
+transaction.feePayer = keypair.publicKey;
+
+// 簽署
+transaction.sign(keypair);
+
+// 發送交易
+const signature = await connection.sendTransaction(transaction);</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>收款地址：</label>
+                <input type="text" id="solToAddress" value="11111111111111111111111111111112" placeholder="Base58 地址">
+            </div>
+            <div class="input-group">
+                <label>金額 (SOL)：</label>
+                <input type="text" id="solAmount" value="0.01" placeholder="0.01">
+            </div>
+            <button onclick="createSolTransaction()">📝 建立並簽署交易</button>
+            <div id="solTxOutput" class="output"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/base-x@3.0.9/index.js"></script>
+    <script>
+        const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+        window.bs58 = baseX(BASE58_ALPHABET);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="../scripts/solana.js"></script>
+    <script>
+        function copyCode(btn, codeId) {
+            const code = document.getElementById(codeId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = '已複製！';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '複製';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

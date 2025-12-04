@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>對稱加密範例</title>
+    <link rel="stylesheet" href="../styles/common.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 對稱加密範例</h1>
+        
+        <nav class="nav-bar">
+            <a href="../index.html">首頁</a>
+            <a href="hash.html">雜湊演算法</a>
+            <a href="symmetric.html" class="active">對稱加密</a>
+            <a href="asymmetric.html">非對稱加密</a>
+            <a href="ethereum.html">Ethereum</a>
+            <a href="bitcoin.html">Bitcoin</a>
+            <a href="solana.html">Solana</a>
+            <a href="cosmos.html">Cosmos</a>
+                    <a href="tron.html">Tron</a>
+            <a href="polkadot.html">Polkadot</a>
+        </nav>
+
+        <div class="info-box">
+            <h4>🔑 對稱加密 (Symmetric Encryption)</h4>
+            <p>加密和解密使用相同的密鑰。優點：速度快，適合大量資料。缺點：密鑰分發問題。</p>
+        </div>
+
+        <div class="demo-section">
+            <h3>AES-256-GCM</h3>
+            <p>高級加密標準 256 位元，GCM 模式提供認證加密（AEAD）。</p>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'aes-code')">複製</button>
+                </div>
+                <pre><code id="aes-code" class="language-javascript">// AES 加密
+const plaintext = "Secret Message 🔒";
+const password = "mySecretPassword123";
+
+// 加密
+const ciphertext = CryptoJS.AES.encrypt(plaintext, password).toString();
+console.log("加密:", ciphertext);
+
+// 解密
+const bytes = CryptoJS.AES.decrypt(ciphertext, password);
+const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+console.log("解密:", decrypted);</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>明文：</label>
+                <input type="text" id="aesPlaintext" value="Secret Message 🔒" placeholder="輸入要加密的文字">
+            </div>
+            <div class="input-group">
+                <label>密碼（會自動生成 256-bit 密鑰）：</label>
+                <input type="password" id="aesPassword" value="mySecretPassword123" placeholder="輸入密碼">
+            </div>
+            <button onclick="encryptAES()">🔒 加密</button>
+            <button onclick="decryptAES()">🔓 解密</button>
+            <div id="aesOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>ChaCha20-Poly1305</h3>
+            <p>現代流加密演算法，比 AES 在軟體實作上更快，用於 TLS 1.3。</p>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例（模擬）</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'chacha-code')">複製</button>
+                </div>
+                <pre><code id="chacha-code" class="language-javascript">// ChaCha20-Poly1305（瀏覽器中使用 Web Crypto API）
+const plaintext = "Fast Encryption";
+const password = "password123";
+
+// 瀏覽器環境下使用 AES 模擬
+// 實際應用建議使用 libsodium.js 或 Web Crypto API
+const ciphertext = CryptoJS.AES.encrypt(plaintext, password).toString();
+console.log("加密:", ciphertext);</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>明文：</label>
+                <input type="text" id="chachaPlaintext" value="Fast Encryption" placeholder="輸入要加密的文字">
+            </div>
+            <div class="input-group">
+                <label>密碼：</label>
+                <input type="password" id="chachaPassword" value="password123" placeholder="輸入密碼">
+            </div>
+            <button onclick="encryptChaCha()">🔒 加密</button>
+            <button onclick="decryptChaCha()">🔓 解密</button>
+            <div id="chachaOutput" class="output"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="../scripts/symmetric.js"></script>
+    <script>
+        function copyCode(btn, codeId) {
+            const code = document.getElementById(codeId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = '已複製！';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '複製';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

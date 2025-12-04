@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加密演算法與區塊鏈簽名範例</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 3em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 50px;
+            font-size: 1.2em;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+
+        .card-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .card p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        .crypto-category {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .crypto-category h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 加密演算法與區塊鏈簽名範例</h1>
+        <p class="subtitle">探索密碼學與區塊鏈技術的實作範例</p>
+        
+        <div class="crypto-category">
+            <h2>密碼學基礎</h2>
+            <div class="card-grid">
+                <a href="pages/hash.html" class="card">
+                    <span class="card-icon">🔐</span>
+                    <h2>雜湊演算法</h2>
+                    <p>SHA-256、SHA-3 (Keccak)、RIPEMD-160 等雜湊函數的實作與應用</p>
+                </a>
+                
+                <a href="pages/symmetric.html" class="card">
+                    <span class="card-icon">🔑</span>
+                    <h2>對稱加密</h2>
+                    <p>AES-256-GCM、ChaCha20-Poly1305 等對稱式加密演算法範例</p>
+                </a>
+                
+                <a href="pages/asymmetric.html" class="card">
+                    <span class="card-icon">🔐</span>
+                    <h2>非對稱加密</h2>
+                    <p>RSA、ECDSA (secp256k1)、Ed25519 等公鑰密碼系統</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="crypto-category">
+            <h2>區塊鏈簽名與交易</h2>
+            <div class="card-grid">
+                <a href="pages/ethereum.html" class="card">
+                    <span class="card-icon">⟠</span>
+                    <h2>Ethereum</h2>
+                    <p>錢包生成、訊息簽名、EIP-712、EIP-1559 交易建立</p>
+                </a>
+                
+                <a href="pages/bitcoin.html" class="card">
+                    <span class="card-icon">₿</span>
+                    <h2>Bitcoin</h2>
+                    <p>多種地址格式、訊息簽名、SegWit 交易範例</p>
+                </a>
+                
+                <a href="pages/solana.html" class="card">
+                    <span class="card-icon">◎</span>
+                    <h2>Solana</h2>
+                    <p>Ed25519 簽名、錢包生成、轉帳交易建立</p>
+                </a>
+                
+                <a href="pages/cosmos.html" class="card">
+                    <span class="card-icon">⚛</span>
+                    <h2>Cosmos</h2>
+                    <p>Bech32 地址、secp256k1 簽名、跨鏈交易</p>
+                </a>
+                
+                <a href="pages/tron.html" class="card">
+                    <span class="card-icon">⚡</span>
+                    <h2>Tron</h2>
+                    <p>Base58Check 地址、TRC-20 代幣、高吞吐量交易</p>
+                </a>
+                
+                <a href="pages/polkadot.html" class="card">
+                    <span class="card-icon">🔴</span>
+                    <h2>Polkadot</h2>
+                    <p>SR25519 簽名、SS58 地址、XCM 跨鏈協議</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

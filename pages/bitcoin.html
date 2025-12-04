@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin 範例</title>
+    <link rel="stylesheet" href="../styles/common.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>₿ Bitcoin 簽名與交易</h1>
+        
+        <nav class="nav-bar">
+            <a href="../index.html">首頁</a>
+            <a href="hash.html">雜湊演算法</a>
+            <a href="symmetric.html">對稱加密</a>
+            <a href="asymmetric.html">非對稱加密</a>
+            <a href="ethereum.html">Ethereum</a>
+            <a href="bitcoin.html" class="active">Bitcoin</a>
+            <a href="solana.html">Solana</a>
+            <a href="cosmos.html">Cosmos</a>
+                    <a href="tron.html">Tron</a>
+            <a href="polkadot.html">Polkadot</a>
+        </nav>
+
+        <div class="info-box">
+            <h4>₿ Bitcoin 簽名與交易</h4>
+            <p>Bitcoin 使用 ECDSA (secp256k1)，地址通過 SHA-256 和 RIPEMD-160 雜湊生成。支援多種地址格式：P2PKH (Legacy), P2SH, P2WPKH (SegWit), P2TR (Taproot)。</p>
+        </div>
+
+        <div class="demo-section">
+            <h3>1. 生成比特幣錢包（支援多種地址格式）</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'btc-wallet-code')">複製</button>
+                </div>
+                <pre><code id="btc-wallet-code" class="language-javascript">// 使用 elliptic 生成 Bitcoin 密鑰對
+const EC = require('elliptic').ec;
+const ec = new EC('secp256k1');
+
+// 生成密鑰對
+const keyPair = ec.genKeyPair();
+const privateKey = keyPair.getPrivate('hex');
+const publicKey = keyPair.getPublic(true, 'hex'); // 壓縮格式
+
+// 生成地址 (簡化流程)
+// 1. SHA-256(公鑰)
+const sha256 = CryptoJS.SHA256(CryptoJS.enc.Hex.parse(publicKey));
+// 2. RIPEMD-160(SHA-256結果)
+const pubKeyHash = CryptoJS.RIPEMD160(sha256).toString();
+
+// P2PKH (Legacy): 1...
+// P2WPKH (SegWit): bc1q...</code></pre>
+            </div>
+
+            <button onclick="generateBtcWallet()">生成 Bitcoin 錢包</button>
+            <div id="btcWalletOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>2. 簽署訊息 (Bitcoin Message Signing)</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'btc-sign-code')">複製</button>
+                </div>
+                <pre><code id="btc-sign-code" class="language-javascript">// Bitcoin 訊息簽名
+const message = "Bitcoin signed message";
+const prefix = "Bitcoin Signed Message:\n";
+const fullMessage = prefix + message;
+
+// 雜湊訊息
+const msgHash = CryptoJS.SHA256(fullMessage).toString();
+
+// 簽署
+const signature = keyPair.sign(msgHash);
+console.log("簽名 r:", signature.r.toString('hex'));
+console.log("簽名 s:", signature.s.toString('hex'));
+
+// 驗證
+const valid = keyPair.verify(msgHash, signature);
+console.log("驗證結果:", valid);</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>訊息：</label>
+                <input type="text" id="btcMessage" value="Bitcoin signed message" placeholder="輸入要簽署的訊息">
+            </div>
+            <button onclick="signBtcMessage()">✍️ 簽署訊息</button>
+            <button onclick="verifyBtcMessage()">✅ 驗證簽名</button>
+            <div id="btcMessageOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>3. 建立並簽署交易 (P2WPKH - SegWit)</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'btc-tx-code')">複製</button>
+                </div>
+                <pre><code id="btc-tx-code" class="language-javascript">// Bitcoin 交易結構（簡化）
+const transaction = {
+    version: 2,
+    inputs: [{
+        txid: 'previous_tx_hash',
+        vout: 0,
+        scriptSig: '', // SegWit 為空
+        witness: [], // 見證資料
+        sequence: 0xffffffff
+    }],
+    outputs: [{
+        value: 10000, // satoshis
+        scriptPubKey: 'OP_0 <pubkey_hash>' // P2WPKH
+    }],
+    locktime: 0
+};
+
+// 簽署交易需要完整的 bitcoinjs-lib
+// 此處為演示概念</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>收款地址：</label>
+                <input type="text" id="btcToAddress" value="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh" placeholder="bc1...">
+            </div>
+            <div class="input-group">
+                <label>金額 (BTC)：</label>
+                <input type="text" id="btcAmount" value="0.001" placeholder="0.001">
+            </div>
+            <button onclick="createBtcTransaction()">📝 建立並簽署交易</button>
+            <div id="btcTxOutput" class="output"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/elliptic/6.5.4/elliptic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="../scripts/bitcoin.js"></script>
+    <script>
+        function copyCode(btn, codeId) {
+            const code = document.getElementById(codeId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = '已複製！';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '複製';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

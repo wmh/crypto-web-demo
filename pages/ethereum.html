@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethereum 範例</title>
+    <link rel="stylesheet" href="../styles/common.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>⟠ Ethereum 簽名與交易</h1>
+        
+        <nav class="nav-bar">
+            <a href="../index.html">首頁</a>
+            <a href="hash.html">雜湊演算法</a>
+            <a href="symmetric.html">對稱加密</a>
+            <a href="asymmetric.html">非對稱加密</a>
+            <a href="ethereum.html" class="active">Ethereum</a>
+            <a href="bitcoin.html">Bitcoin</a>
+            <a href="solana.html">Solana</a>
+            <a href="cosmos.html">Cosmos</a>
+                    <a href="tron.html">Tron</a>
+            <a href="polkadot.html">Polkadot</a>
+        </nav>
+
+        <div class="info-box">
+            <h4>⟠ Ethereum 簽名與交易</h4>
+            <p>Ethereum 使用 ECDSA (secp256k1) 進行簽名，Keccak-256 進行雜湊。支援 EIP-155 (防重放攻擊)、EIP-1559 (新費用機制)、EIP-712 (結構化資料簽名)。</p>
+        </div>
+
+        <div class="demo-section">
+            <h3>1. 生成錢包</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'eth-wallet-code')">複製</button>
+                </div>
+                <pre><code id="eth-wallet-code" class="language-javascript">// 使用 ethers.js 生成 Ethereum 錢包
+const { ethers } = require('ethers');
+
+// 生成隨機錢包
+const wallet = ethers.Wallet.createRandom();
+console.log("助記詞:", wallet.mnemonic.phrase);
+console.log("私鑰:", wallet.privateKey);
+console.log("地址:", wallet.address);
+
+// 從私鑰恢復錢包
+const recoveredWallet = new ethers.Wallet(privateKey);
+
+// 從助記詞恢復錢包
+const walletFromMnemonic = ethers.Wallet.fromMnemonic(mnemonic);</code></pre>
+            </div>
+
+            <button onclick="generateEthWallet()">生成 Ethereum 錢包</button>
+            <div id="ethWalletOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>2. 簽署訊息 (Personal Sign)</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'eth-sign-code')">複製</button>
+                </div>
+                <pre><code id="eth-sign-code" class="language-javascript">// Personal Sign
+const message = "Welcome to Ethereum!";
+const signature = await wallet.signMessage(message);
+console.log("簽名:", signature);
+
+// 驗證簽名並恢復地址
+const recoveredAddress = ethers.verifyMessage(message, signature);
+console.log("恢復的地址:", recoveredAddress);
+console.log("是否匹配:", recoveredAddress === wallet.address);</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>訊息：</label>
+                <input type="text" id="ethMessage" value="Welcome to Ethereum!" placeholder="輸入要簽署的訊息">
+            </div>
+            <button onclick="signEthMessage()">✍️ 簽署訊息</button>
+            <button onclick="verifyEthMessage()">✅ 驗證簽名</button>
+            <div id="ethMessageOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>3. EIP-712 結構化資料簽名</h3>
+            <p>用於 DApp 授權、NFT 交易等場景</p>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'eip712-code')">複製</button>
+                </div>
+                <pre><code id="eip712-code" class="language-javascript">// EIP-712 結構化資料簽名
+const domain = {
+    name: 'My DApp',
+    version: '1',
+    chainId: 1,
+    verifyingContract: '0x...'
+};
+
+const types = {
+    Mail: [
+        { name: 'from', type: 'address' },
+        { name: 'to', type: 'address' },
+        { name: 'contents', type: 'string' }
+    ]
+};
+
+const value = {
+    from: wallet.address,
+    to: '0x...',
+    contents: 'Hello, EIP-712!'
+};
+
+const signature = await wallet.signTypedData(domain, types, value);</code></pre>
+            </div>
+
+            <button onclick="signEIP712()">✍️ 簽署 EIP-712 資料</button>
+            <div id="eip712Output" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>4. 建立並簽署交易 (EIP-1559)</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'eth-tx-code')">複製</button>
+                </div>
+                <pre><code id="eth-tx-code" class="language-javascript">// 建立 EIP-1559 交易
+const tx = {
+    to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0',
+    value: ethers.parseEther('0.1'),
+    chainId: 1,
+    nonce: await provider.getTransactionCount(wallet.address),
+    gasLimit: 21000,
+    maxFeePerGas: ethers.parseUnits('50', 'gwei'),
+    maxPriorityFeePerGas: ethers.parseUnits('2', 'gwei'),
+    type: 2 // EIP-1559 交易類型
+};
+
+// 簽署交易
+const signedTx = await wallet.signTransaction(tx);
+console.log("已簽署交易:", signedTx);
+
+// 發送交易
+const txResponse = await wallet.sendTransaction(tx);</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>收款地址：</label>
+                <input type="text" id="ethToAddress" value="0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0" placeholder="0x...">
+            </div>
+            <div class="input-group">
+                <label>金額 (ETH)：</label>
+                <input type="text" id="ethAmount" value="0.1" placeholder="0.1">
+            </div>
+            <button onclick="createEthTransaction()">📝 建立並簽署交易</button>
+            <div id="ethTxOutput" class="output"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="../scripts/ethereum.js"></script>
+    <script>
+        function copyCode(btn, codeId) {
+            const code = document.getElementById(codeId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = '已複製！';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '複製';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

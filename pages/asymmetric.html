@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>非對稱加密範例</title>
+    <link rel="stylesheet" href="../styles/common.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 非對稱加密範例</h1>
+        
+        <nav class="nav-bar">
+            <a href="../index.html">首頁</a>
+            <a href="hash.html">雜湊演算法</a>
+            <a href="symmetric.html">對稱加密</a>
+            <a href="asymmetric.html" class="active">非對稱加密</a>
+            <a href="ethereum.html">Ethereum</a>
+            <a href="bitcoin.html">Bitcoin</a>
+            <a href="solana.html">Solana</a>
+            <a href="cosmos.html">Cosmos</a>
+                    <a href="tron.html">Tron</a>
+            <a href="polkadot.html">Polkadot</a>
+        </nav>
+
+        <div class="info-box">
+            <h4>🔐 非對稱加密 (Asymmetric Encryption)</h4>
+            <p>使用公鑰加密、私鑰解密。公鑰可公開，私鑰保密。用於數位簽章、密鑰交換等。</p>
+        </div>
+
+        <div class="demo-section">
+            <h3>RSA-2048</h3>
+            <p>基於大數分解難題的公鑰密碼系統。</p>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例 (Web Crypto API)</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'rsa-code')">複製</button>
+                </div>
+                <pre><code id="rsa-code" class="language-javascript">// 使用 Web Crypto API 生成 RSA 密鑰對
+const keyPair = await window.crypto.subtle.generateKey(
+    {
+        name: "RSA-OAEP",
+        modulusLength: 2048,
+        publicExponent: new Uint8Array([1, 0, 1]),
+        hash: "SHA-256"
+    },
+    true,
+    ["encrypt", "decrypt"]
+);
+
+// 加密
+const encrypted = await window.crypto.subtle.encrypt(
+    { name: "RSA-OAEP" },
+    keyPair.publicKey,
+    data
+);
+
+// 解密
+const decrypted = await window.crypto.subtle.decrypt(
+    { name: "RSA-OAEP" },
+    keyPair.privateKey,
+    encrypted
+);</code></pre>
+            </div>
+
+            <button onclick="generateRSAKeys()">生成 RSA 密鑰對</button>
+            <div id="rsaKeysOutput" class="output"></div>
+            
+            <div class="input-group" style="margin-top: 15px;">
+                <label>明文：</label>
+                <input type="text" id="rsaPlaintext" value="RSA Encrypted Message" placeholder="輸入要加密的文字">
+            </div>
+            <button onclick="encryptRSA()">🔒 使用公鑰加密</button>
+            <button onclick="decryptRSA()">🔓 使用私鑰解密</button>
+            <div id="rsaOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>ECDSA (secp256k1)</h3>
+            <p>橢圓曲線數位簽章演算法，Bitcoin 和 Ethereum 使用的曲線。</p>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'ecdsa-code')">複製</button>
+                </div>
+                <pre><code id="ecdsa-code" class="language-javascript">// 使用 elliptic 函式庫
+const EC = require('elliptic').ec;
+const ec = new EC('secp256k1');
+
+// 生成密鑰對
+const keyPair = ec.genKeyPair();
+const privateKey = keyPair.getPrivate('hex');
+const publicKey = keyPair.getPublic('hex');
+
+// 簽署訊息
+const message = "Sign this message";
+const msgHash = CryptoJS.SHA256(message).toString();
+const signature = keyPair.sign(msgHash);
+
+// 驗證簽名
+const valid = keyPair.verify(msgHash, signature);
+console.log("簽名有效:", valid);</code></pre>
+            </div>
+
+            <button onclick="generateECDSAKeys()">生成 ECDSA 密鑰對</button>
+            <div id="ecdsaKeysOutput" class="output"></div>
+            
+            <div class="input-group" style="margin-top: 15px;">
+                <label>訊息：</label>
+                <input type="text" id="ecdsaMessage" value="Sign this message" placeholder="輸入要簽署的訊息">
+            </div>
+            <button onclick="signECDSA()">✍️ 簽署</button>
+            <button onclick="verifyECDSA()">✅ 驗證</button>
+            <div id="ecdsaOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>Ed25519</h3>
+            <p>EdDSA 簽章演算法，Solana、Cardano、Polkadot 使用。比 ECDSA 更快更安全。</p>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'ed25519-code')">複製</button>
+                </div>
+                <pre><code id="ed25519-code" class="language-javascript">// 使用 @noble/ed25519 函式庫
+import * as ed25519 from '@noble/ed25519';
+
+// 生成密鑰對
+const privateKey = ed25519.utils.randomPrivateKey();
+const publicKey = await ed25519.getPublicKey(privateKey);
+
+// 簽署訊息
+const message = new TextEncoder().encode("Solana message");
+const signature = await ed25519.sign(message, privateKey);
+
+// 驗證簽名
+const valid = await ed25519.verify(signature, message, publicKey);
+console.log("簽名有效:", valid);</code></pre>
+            </div>
+
+            <button onclick="generateEd25519Keys()">生成 Ed25519 密鑰對</button>
+            <div id="ed25519KeysOutput" class="output"></div>
+            
+            <div class="input-group" style="margin-top: 15px;">
+                <label>訊息：</label>
+                <input type="text" id="ed25519Message" value="Solana message" placeholder="輸入要簽署的訊息">
+            </div>
+            <button onclick="signEd25519()">✍️ 簽署</button>
+            <button onclick="verifyEd25519()">✅ 驗證</button>
+            <div id="ed25519Output" class="output"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/elliptic/6.5.4/elliptic.min.js"></script>
+    <script src="https://unpkg.com/@noble/ed25519@1.7.3/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="../scripts/asymmetric.js"></script>
+    <script>
+        function copyCode(btn, codeId) {
+            const code = document.getElementById(codeId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = '已複製！';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '複製';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

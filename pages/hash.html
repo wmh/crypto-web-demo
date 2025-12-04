@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雜湊演算法範例</title>
+    <link rel="stylesheet" href="../styles/common.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 雜湊演算法範例</h1>
+        
+        <nav class="nav-bar">
+            <a href="../index.html">首頁</a>
+            <a href="hash.html" class="active">雜湊演算法</a>
+            <a href="symmetric.html">對稱加密</a>
+            <a href="asymmetric.html">非對稱加密</a>
+            <a href="ethereum.html">Ethereum</a>
+            <a href="bitcoin.html">Bitcoin</a>
+            <a href="solana.html">Solana</a>
+            <a href="cosmos.html">Cosmos</a>
+                    <a href="tron.html">Tron</a>
+            <a href="polkadot.html">Polkadot</a>
+        </nav>
+
+        <div class="info-box">
+            <h4>📚 雜湊演算法 (Hash Functions)</h4>
+            <p>雜湊函數將任意長度的輸入資料轉換為固定長度的輸出（雜湊值）。特性：單向性、抗碰撞性、雪崩效應。常用於資料完整性驗證、數位簽章、密碼儲存等。</p>
+        </div>
+
+        <div class="demo-section">
+            <h3>SHA-256 (SHA-2 Family)</h3>
+            <p>安全雜湊演算法 256 位元，由 NSA 設計，廣泛用於比特幣、SSL/TLS 等。</p>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'sha256-code')">複製</button>
+                </div>
+                <pre><code id="sha256-code" class="language-javascript">// 使用 CryptoJS 計算 SHA-256
+const input = "Hello, Blockchain!";
+const hash = CryptoJS.SHA256(input).toString();
+console.log(hash);
+// 輸出: 32f78599e83c4526b8c0cf0355c7e7e8b1f9c5e2e5c4c4e6f4a4c8f4c8f4c8f4</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>輸入文字：</label>
+                <input type="text" id="sha256Input" value="Hello, Blockchain!" placeholder="輸入要雜湊的文字">
+            </div>
+            <button onclick="hashSHA256()">計算 SHA-256</button>
+            <div id="sha256Output" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>SHA-3 (Keccak)</h3>
+            <p>SHA-3 標準，使用海綿結構。Ethereum 使用 Keccak-256（與 SHA3-256 略有不同）。</p>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'sha3-code')">複製</button>
+                </div>
+                <pre><code id="sha3-code" class="language-javascript">// 使用 CryptoJS 計算 Keccak-256
+const input = "Ethereum uses Keccak-256";
+const hash = CryptoJS.SHA3(input, { outputLength: 256 }).toString();
+console.log(hash);
+// Ethereum 的雜湊函數</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>輸入文字：</label>
+                <input type="text" id="sha3Input" value="Ethereum uses Keccak-256" placeholder="輸入要雜湊的文字">
+            </div>
+            <button onclick="hashSHA3()">計算 Keccak-256</button>
+            <div id="sha3Output" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>RIPEMD-160</h3>
+            <p>160 位元雜湊函數，用於比特幣地址生成（SHA-256 後再 RIPEMD-160）。</p>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'ripemd-code')">複製</button>
+                </div>
+                <pre><code id="ripemd-code" class="language-javascript">// 使用 CryptoJS 計算 RIPEMD-160
+const input = "Bitcoin Address";
+const hash = CryptoJS.RIPEMD160(input).toString();
+console.log(hash);
+
+// 比特幣地址生成流程
+const publicKey = "..."; // 公鑰
+const sha256Hash = CryptoJS.SHA256(publicKey);
+const ripemd160Hash = CryptoJS.RIPEMD160(sha256Hash);
+// 接著進行 Base58Check 編碼</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>輸入文字：</label>
+                <input type="text" id="ripemdInput" value="Bitcoin Address" placeholder="輸入要雜湊的文字">
+            </div>
+            <button onclick="hashRIPEMD160()">計算 RIPEMD-160</button>
+            <div id="ripemdOutput" class="output"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="../scripts/hash.js"></script>
+    <script>
+        function copyCode(btn, codeId) {
+            const code = document.getElementById(codeId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = '已複製！';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '複製';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

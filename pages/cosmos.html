@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmos 範例</title>
+    <link rel="stylesheet" href="../styles/common.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>⚛ Cosmos 簽名與交易</h1>
+        
+        <nav class="nav-bar">
+            <a href="../index.html">首頁</a>
+            <a href="hash.html">雜湊演算法</a>
+            <a href="symmetric.html">對稱加密</a>
+            <a href="asymmetric.html">非對稱加密</a>
+            <a href="ethereum.html">Ethereum</a>
+            <a href="bitcoin.html">Bitcoin</a>
+            <a href="solana.html">Solana</a>
+            <a href="cosmos.html" class="active">Cosmos</a>
+                    <a href="tron.html">Tron</a>
+            <a href="polkadot.html">Polkadot</a>
+        </nav>
+
+        <div class="info-box">
+            <h4>⚛ Cosmos 簽名與交易</h4>
+            <p>Cosmos SDK 支援多種簽名演算法：secp256k1 (默認)、ed25519、sr25519。使用 Bech32 地址編碼，不同鏈有不同前綴（cosmos、osmo、juno 等）。</p>
+        </div>
+
+        <div class="demo-section">
+            <h3>1. 生成 Cosmos 錢包</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'cosmos-wallet-code')">複製</button>
+                </div>
+                <pre><code id="cosmos-wallet-code" class="language-javascript">// Cosmos 使用 secp256k1 (與 Bitcoin/Ethereum 相同)
+const EC = require('elliptic').ec;
+const ec = new EC('secp256k1');
+
+// 生成密鑰對
+const keyPair = ec.genKeyPair();
+const privateKey = keyPair.getPrivate('hex');
+const publicKey = keyPair.getPublic(true, 'hex');
+
+// 生成 Bech32 地址
+// 1. SHA-256 公鑰
+const sha256 = CryptoJS.SHA256(CryptoJS.enc.Hex.parse(publicKey));
+// 2. RIPEMD-160
+const hash = CryptoJS.RIPEMD160(sha256).toString();
+// 3. Bech32 編碼 (前綴: cosmos, osmo, juno 等)
+const address = bech32.encode('cosmos', bech32.toWords(hash));</code></pre>
+            </div>
+
+            <button onclick="generateCosmosWallet()">生成 Cosmos 錢包</button>
+            <div id="cosmosWalletOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>2. 簽署訊息</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'cosmos-sign-code')">複製</button>
+                </div>
+                <pre><code id="cosmos-sign-code" class="language-javascript">// Cosmos 訊息簽名
+const message = "Cosmos Hub";
+const msgHash = CryptoJS.SHA256(message).toString();
+
+// 簽署
+const signature = keyPair.sign(msgHash);
+console.log("簽名 r:", signature.r.toString('hex'));
+console.log("簽名 s:", signature.s.toString('hex'));
+
+// 驗證
+const valid = keyPair.verify(msgHash, signature);
+console.log("驗證結果:", valid);
+
+// Cosmos SDK 使用 Amino 或 Protobuf 編碼訊息</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>訊息：</label>
+                <input type="text" id="cosmosMessage" value="Cosmos Hub" placeholder="輸入要簽署的訊息">
+            </div>
+            <button onclick="signCosmosMessage()">✍️ 簽署訊息</button>
+            <button onclick="verifyCosmosMessage()">✅ 驗證簽名</button>
+            <div id="cosmosMessageOutput" class="output"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>3. 建立並簽署轉帳交易</h3>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>💻 JavaScript 範例</h4>
+                    <button class="copy-btn" onclick="copyCode(this, 'cosmos-tx-code')">複製</button>
+                </div>
+                <pre><code id="cosmos-tx-code" class="language-javascript">// Cosmos SDK 交易結構
+const txBody = {
+    messages: [{
+        '@type': '/cosmos.bank.v1beta1.MsgSend',
+        from_address: 'cosmos1...',
+        to_address: 'cosmos1...',
+        amount: [{
+            denom: 'uatom',
+            amount: '100000' // 0.1 ATOM (1 ATOM = 1,000,000 uatom)
+        }]
+    }],
+    memo: '',
+    timeout_height: '0',
+    extension_options: [],
+    non_critical_extension_options: []
+};
+
+// 簽署資訊
+const authInfo = {
+    signer_infos: [{
+        public_key: publicKey,
+        mode_info: { single: { mode: 'SIGN_MODE_DIRECT' } },
+        sequence: '0'
+    }],
+    fee: {
+        amount: [{ denom: 'uatom', amount: '5000' }],
+        gas_limit: '200000'
+    }
+};</code></pre>
+            </div>
+
+            <div class="input-group">
+                <label>收款地址：</label>
+                <input type="text" id="cosmosToAddress" value="cosmos1..." placeholder="cosmos1...">
+            </div>
+            <div class="input-group">
+                <label>金額 (ATOM)：</label>
+                <input type="text" id="cosmosAmount" value="0.1" placeholder="0.1">
+            </div>
+            <button onclick="createCosmosTransaction()">📝 建立並簽署交易</button>
+            <div id="cosmosTxOutput" class="output"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/elliptic/6.5.4/elliptic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="../scripts/cosmos.js"></script>
+    <script>
+        function copyCode(btn, codeId) {
+            const code = document.getElementById(codeId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = '已複製！';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '複製';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
