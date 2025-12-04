@@ -166,12 +166,6 @@ const { ethers } = require('ethers');
 2. 💻 [CODE_EXAMPLES.md](CODE_EXAMPLES.md) - 詳細程式碼範例
 3. 📝 [CHANGELOG.md](CHANGELOG.md) - 更新歷史
 
-### 外部資源
-
-- [密碼學基礎](https://en.wikipedia.org/wiki/Cryptography)
-- [區塊鏈技術](https://ethereum.org/en/developers/docs/)
-- [JavaScript Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API)
-
 ## ❓ 常見問題
 
 ### Q: 需要安裝什麼軟體嗎？

@@ -209,12 +209,6 @@ console.log(hash);
 
 ✅ **總計 29+ 個程式碼區塊**
 
-## 🔗 相關資源
-
-- [Prism.js 官網](https://prismjs.com/)
-- [Prism 主題展示](https://prismjs.com/index.html#themes)
-- [支援語言列表](https://prismjs.com/index.html#supported-languages)
-
 ## 📸 截圖對比
 
 ### 之前

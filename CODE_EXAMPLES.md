@@ -271,14 +271,6 @@ await xcmTransfer.signAndSend(keyPair);
 - 建議使用硬體錢包存儲重要資產
 - 測試時使用測試網路
 
-## 🔗 相關資源
-
-- [CryptoJS 文件](https://cryptojs.gitbook.io/docs/)
-- [elliptic 文件](https://github.com/indutny/elliptic)
-- [ethers.js 文件](https://docs.ethers.org/)
-- [Solana Web3.js 文件](https://solana-labs.github.io/solana-web3.js/)
-- [Cosmos SDK 文件](https://docs.cosmos.network/)
-
 ## 🤝 貢獻
 
 如果您發現程式碼範例有誤或想要添加更多範例，歡迎提交 Pull Request！

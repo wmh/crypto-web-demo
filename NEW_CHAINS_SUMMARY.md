@@ -134,11 +134,10 @@ const xcmTransfer = api.tx.xcmPallet.reserveTransferAssets(
 
 ## 📚 相關文件
 
-- [Tron 文件](https://developers.tron.network/)
-- [Polkadot 文件](https://wiki.polkadot.network/)
 - [專案 README](README.md)
 - [快速開始](QUICK_START.md)
 - [程式碼範例](CODE_EXAMPLES.md)
+- [部署說明](DEPLOYMENT.md)
 
 ---
 
